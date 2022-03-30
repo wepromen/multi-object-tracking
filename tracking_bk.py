@@ -54,7 +54,7 @@ def main(yolo):
     tracker = Tracker(metric)
 
     writeVideo_flag = False 
-    OPTICAL = True
+    OPTICAL = False
 
     ## get video source
     video_filename = './samples/u_frontcam_cuted_853x480.mp4'

@@ -28,6 +28,7 @@ from optical_flow.getFeatures import getFeatures
 from optical_flow.estimateAllTranslation import estimateAllTranslation
 from optical_flow.applyGeometricTransformation import applyGeometricTransformation
 
+yolo = YOLO()
 
 warnings.filterwarnings('ignore')
 
@@ -41,22 +42,36 @@ def bbox_transform(newbboxs):
         return_boxs.append([x,y,w,h])
     return return_boxs
 
-def mot_task(args):
+def mot_task(frame, showerBBQueue, fpsQueue):
     t1 = time.time()
-    fps = 0.0
-    (frame, yolo, encoder, nms_max_overlap1, tracker, OPTICAL, firstflag, showerBBQueue, fpsQueue) = args
 
-    # print('@@ mot_task: ', frame)
+    print('@@ mot_task: 1')
+    # yolo = YOLO()
+    print('@@ mot_task: 2 ', type(yolo))
+
+    # Definition of the parameters
+    max_cosine_distance = 0.3
+    nn_budget = None
+    nms_max_overlap1 = 1.0
+    
+    print('@@ mot_task: ', 1)
+
+
+    # deep_sort 
+    model_filename = 'model_data/mars-small128.pb'
+    encoder = gdet.create_box_encoder(model_filename,batch_size=1)
+    metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
+    tracker = Tracker(metric)
+
+    fps = 0.0
 
     image = Image.fromarray(frame)
 
-    # print ("In kết quả ra màn hình ngay lập tức.")
-    # time.sleep(15)
-    # print ("In kết quả ra màn hình sau 3s.")
+    print('@@ mot_task: ', image)
 
     ## yolo detection
     boxs = yolo.detect_image(image) # [x,y,w,h]
-    # print("\n @@ box_num",len(boxs))
+    print("\n @@ box_num",len(boxs))
     features = encoder(frame,boxs)
     
     # score to 1.0 here).
@@ -130,18 +145,19 @@ def mot_task(args):
 
     # cv2.imshow('', frame)
 
-def main(yolo):
-
-    # Definition of the parameters
-    max_cosine_distance = 0.3
-    nn_budget = None
-    nms_max_overlap1 = 1.0
+# def main(yolo):
+def main():
     
-    # deep_sort 
-    model_filename = 'model_data/mars-small128.pb'
-    encoder = gdet.create_box_encoder(model_filename,batch_size=1)
-    metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
-    tracker = Tracker(metric)
+    # # Definition of the parameters
+    # max_cosine_distance = 0.3
+    # nn_budget = None
+    # nms_max_overlap1 = 1.0
+    
+    # # deep_sort 
+    # model_filename = 'model_data/mars-small128.pb'
+    # encoder = gdet.create_box_encoder(model_filename,batch_size=1)
+    # metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
+    # tracker = Tracker(metric)
 
     writeVideo_flag = False 
     OPTICAL = False
@@ -196,8 +212,8 @@ def main(yolo):
         # import concurrent.futures as con
         # with con.ThreadPoolExecutor(max_workers=24) as excuter:
         #     excuter.map(mot_task(frame, yolo, encoder, nms_max_overlap1, tracker, OPTICAL, firstflag, fps), range(24))
-        args = (frame, yolo, encoder, nms_max_overlap1, tracker, OPTICAL, firstflag, showerBBQueue, fpsQueue)
-        worker1 = threading.Thread(target= mot_task, args=(args,))
+        # args = (frame, yolo, encoder, nms_max_overlap1, tracker, OPTICAL, firstflag, showerBBQueue, fpsQueue)
+        worker1 = threading.Thread(target= mot_task, args=(frame, showerBBQueue, fpsQueue,))
         worker1.start()
         ## ================== Start MOT thread
 
@@ -386,4 +402,5 @@ def main(yolo):
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    main(YOLO())
+    main() 
+    # main(YOLO()) 
