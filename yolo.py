@@ -11,7 +11,10 @@ from timeit import time
 from timeit import default_timer as timer  ### to calculate FPS
 
 import numpy as np
-from keras import backend as K
+# from keras import backend as K
+import tensorflow.compat.v1.keras.backend as K
+import tensorflow as tf 
+tf.compat.v1.disable_eager_execution() 
 from keras.models import load_model
 from PIL import Image, ImageFont, ImageDraw
 

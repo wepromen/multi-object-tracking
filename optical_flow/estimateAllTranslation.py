@@ -14,6 +14,7 @@ from .estimateFeatureTranslation import estimateFeatureTranslation
 def estimateAllTranslation(startXs,startYs,img1,img2):
     I = cv2.cvtColor(img1,cv2.COLOR_RGB2GRAY)
     I = cv2.GaussianBlur(I,(5,5),0.2)
+    # Iy, Ix = np.gradient(np.linalg.pinv(I))
     Iy, Ix = np.gradient(I.astype(float))
 
     startXs_flat = startXs.flatten()

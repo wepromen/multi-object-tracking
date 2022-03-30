@@ -4,10 +4,14 @@ from functools import wraps
 
 import numpy as np
 import tensorflow as tf
-from keras import backend as K
+# from keras import backend 
+import tensorflow.compat.v1.keras.backend as K 
+import tensorflow as tf 
+tf.compat.v1.disable_eager_execution()
 from keras.layers import Conv2D, Add, ZeroPadding2D, UpSampling2D, Concatenate
 from keras.layers.advanced_activations import LeakyReLU
-from keras.layers.normalization import BatchNormalization
+from tensorflow.keras.layers import BatchNormalization
+# from keras.layers.normalization import BatchNormalization
 from keras.models import Model
 from keras.regularizers import l2
 
@@ -110,8 +114,10 @@ def yolo_head(feats, anchors, num_classes, input_shape):
     box_class_probs = K.sigmoid(feats[..., 5:])
 
     # Adjust preditions to each spatial grid point and anchor size.
-    box_xy = (box_xy + grid) / K.cast(grid_shape[::-1], K.dtype(feats))
-    box_wh = box_wh * anchors_tensor / K.cast(input_shape[::-1], K.dtype(feats))
+    # box_xy = (box_xy + grid) / K.cast(grid_shape[::-1], K.dtype(feats))
+    # box_wh = box_wh * anchors_tensor / K.cast(input_shape[::-1], K.dtype(feats))
+    box_xy = (K.sigmoid(feats[..., :2]) + grid) / K.cast(grid_shape[..., ::-1], K.dtype(feats))
+    box_wh = K.exp(feats[..., 2:4]) * anchors_tensor / K.cast(input_shape[..., ::-1], K.dtype(feats))
 
     return box_xy, box_wh, box_confidence, box_class_probs
 

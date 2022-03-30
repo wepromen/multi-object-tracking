@@ -85,8 +85,9 @@ def estimateFeatureTranslation(startX,startY,Ix,Iy,img1,img2):
         I2_value = interp2(img2_gray, coor[[0],:], coor[[1],:])
         Ip=(I2_value-I1_value).reshape((-1,1))
         b=-I.dot(Ip)
-        solution=inv(A).dot(b)
+        # solution=inv(A).dot(b)
         # solution = np.linalg.solve(A, b)
+        solution = np.linalg.lstsq(A, b, rcond=None)[0]
         X += solution[0,0]
         Y += solution[1,0]
     
