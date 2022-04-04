@@ -29,11 +29,10 @@ class MOTWorker(Process):
                 # boxs = self.yolo.detect_image(image) # [x,y,w,h]
                 yolo = YOLO()
                 t2 = time.time()
-
-                boxs = yolo.detect_image(image) # [x,y,w,h]
+                boxs =  yolo.detect_image(image) # [x,y,w,h]
+                print('@@ Yolo detection time: ', (time.time()-t2))
 
                 fps  = ( fps + (1./(time.time()-t1)) ) / 2
-                print('@@ Time: ', (time.time()-t2))
                 print("fps= %f"%(fps))
                 textFPS = 'FPS: {:.2f}'.format(fps)
                 self.fpsQueue.put(textFPS)
