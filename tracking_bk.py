@@ -57,7 +57,8 @@ def main(yolo):
     OPTICAL = False
 
     ## get video source
-    video_filename = './samples/u_frontcam_cuted_853x480.mp4'
+    # video_filename = './samples/u_frontcam_cuted_853x480.mp4'
+    video_filename = -1
     video_capture = cv2.VideoCapture(video_filename)
 
     #instatiate video writer
@@ -90,9 +91,11 @@ def main(yolo):
         t1 = time.time()
 
         image = Image.fromarray(frame)
+        t2 = time.time()
         
         ## yolo detection
         boxs = yolo.detect_image(image) # [x,y,w,h]
+        print('@@ Yolo detection time: ', time.time() - t2)
         # print("\n @@ box_num",len(boxs))
         features = encoder(frame,boxs)
         

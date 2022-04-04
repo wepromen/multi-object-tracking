@@ -11,6 +11,12 @@ from multiprocessing import Process, Value, Queue
 
 warnings.filterwarnings('ignore')
 
+mot_worker_input_queue = Queue()
+showerBBQueue = Queue()
+fpsQueue = Queue()
+showerFrameQueue = Queue()
+
+
 def bbox_transform(newbboxs):
     return_boxs = []
     for i in range(newbboxs.shape[0]):
@@ -26,20 +32,26 @@ def main():
 
     #initial shower
     showerVideo = Value('i', 1)
-    showerBBQueue = Queue()
-    showerFrameQueue = Queue()
-    fpsQueue = Queue()
+    # showerBBQueue = Queue()
+    global showerBBQueue
+    global showerFrameQueue
+    global fpsQueue
+    global mot_worker_input_queue
+    # showerFrameQueue = Queue()
+    # fpsQueue = Queue()
     videoShower = VideoShower()
     videoShowerProcess = Process(target=videoShower.start, args=(showerVideo, showerFrameQueue, showerBBQueue, fpsQueue))
     videoShowerProcess.start()
 
     # NOTE: MOT Workers
-    mot_worker_input_queue = Queue()
+    # mot_worker_input_queue = Queue()
     number_of_mot_workers = 1
 
     for i in range(number_of_mot_workers):
         mot_worker = MOTWorker(input_queue=mot_worker_input_queue,
                                 output_queue=showerBBQueue, name= '@@ MOTWorker ' + str(i), fpsQueue = fpsQueue)
+        mot_worker.daemon = True
+        print(mot_worker)
         mot_worker.start()
 
 
@@ -77,6 +89,8 @@ def main():
     if videoShowerProcess is not None:
         showerVideo.value = 0
         videoShowerProcess.join()
+    if mot_worker is not None:
+        mot_worker.join()
 
     cv2.destroyAllWindows()
 
