@@ -15,22 +15,25 @@ class MOTWorker(Process):
         # self.yolo = YOLO()
 
     def run(self):
+        fps = 0.0
         while True:
             if self.input_queue.empty():
                 continue
             else:
                 frame = self.input_queue.get()
 
-                fps = 0.0
                 t1 = time.time()
 
                 image = Image.fromarray(frame)
 
                 # boxs = self.yolo.detect_image(image) # [x,y,w,h]
                 yolo = YOLO()
+                t2 = time.time()
+
                 boxs = yolo.detect_image(image) # [x,y,w,h]
 
                 fps  = ( fps + (1./(time.time()-t1)) ) / 2
+                print('@@ Time: ', (time.time()-t2))
                 print("fps= %f"%(fps))
                 textFPS = 'FPS: {:.2f}'.format(fps)
                 self.fpsQueue.put(textFPS)
