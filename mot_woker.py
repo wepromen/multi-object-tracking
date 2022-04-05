@@ -3,7 +3,7 @@ import time
 from PIL import Image
 from yolo import YOLO
 
-# yolo = YOLO()
+yolo = None
 
 class MOTWorker(Process):
     def __init__ (self, name, input_queue: Queue, output_queue: Queue, fpsQueue: Queue):
@@ -12,7 +12,6 @@ class MOTWorker(Process):
         self.input_queue = input_queue
         self.output_queue = output_queue
         self.fpsQueue = fpsQueue
-        # self.yolo = YOLO()
 
     def run(self):
         fps = 0.0
@@ -23,16 +22,18 @@ class MOTWorker(Process):
                 frame = self.input_queue.get()
 
                 t1 = time.time()
-
                 image = Image.fromarray(frame)
 
-                # boxs = self.yolo.detect_image(image) # [x,y,w,h]
-                yolo = YOLO()
+                global yolo
+                if (yolo == None):
+                    yolo = YOLO()
                 t2 = time.time()
-                boxs =  yolo.detect_image(image) # [x,y,w,h]
-                print('@@ Yolo detection time: ', (time.time()-t2))
 
-                fps  = ( fps + (1./(time.time()-t1)) ) / 2
+                boxs = yolo.detect_image(image) # [x,y,w,h]
+                
+                t_detec_end = time.time()
+                print('@@ Yolo det-time: ', t_detec_end - t2)
+                fps  = ( fps + (1./(t_detec_end-t1)) ) / 2
                 print("fps= %f"%(fps))
                 textFPS = 'FPS: {:.2f}'.format(fps)
                 self.fpsQueue.put(textFPS)

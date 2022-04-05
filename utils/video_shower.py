@@ -10,13 +10,18 @@ class VideoShower ():
     print('===== \nStarting showerVideo: {0} \n showerFrameQueue: {1} \n showerBBQueue: {2}\n'.format(showerVideo.value, showerFrameQueue.qsize(), showerBBQueue.qsize()))
     oldBBox = None
     oldFPS = None
+    win_name = "output"
+    cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)    # Create window with freedom of dimensions
     try:
       while showerVideo.value or not showerFrameQueue.empty():
         #if bbox queue is not empty then get bbox and write it. Otherwise do not nothing.
         # print('@@ showerFrameQueue.qsize: ', showerFrameQueue.qsize())
         # print('@@ showerBBQueue.qsize: ', showerBBQueue.qsize())
         if not showerFrameQueue.empty():
+          print('@@ showerFrameQueue be qsize: ', showerFrameQueue.qsize())
           frame = showerFrameQueue.get()
+          print('@@ showerFrameQueue af qsize: ', showerFrameQueue.qsize())
+
           if not showerBBQueue.empty():
             (xmin, ymin, boxw, boxh) = showerBBQueue.get()
             # print('@@ shower Prc bbox: ', xmin, ymin, boxw, boxh)
@@ -38,7 +43,9 @@ class VideoShower ():
           else:
             cv2.putText(frame, oldFPS, (10, 20), font, 0.5, (255, random.randint(0, 255), 255), 2)
 
-          cv2.imshow('Video', frame)
+          cv2.imshow(win_name, frame)
+          cv2.resizeWindow(win_name, 960, 540)
+
           # Press Q to stop!
           if cv2.waitKey(1) & 0xFF == ord('q'):
             break

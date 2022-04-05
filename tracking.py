@@ -1,4 +1,5 @@
 from __future__ import division, print_function, absolute_import
+from sys import maxsize
 
 from timeit import time
 import warnings
@@ -63,8 +64,10 @@ def main():
         if videoShowerProcess is not None:
             showerFrameQueue.put(frame)
             # print('@@ === Put frame to shower Proc')
-
-        mot_worker_input_queue.put(frame)
+        # mot_worker_input_queue = Queue()
+        if mot_worker_input_queue.qsize() == 0:
+            print('@@ === Put frame: ', )
+            mot_worker_input_queue.put(frame)
         
     # frame_rate = 10000
     # prev = 0
