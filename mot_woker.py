@@ -19,7 +19,7 @@ class MOTWorker(Process):
             if self.input_queue.empty():
                 continue
             else:
-                frame = self.input_queue.get()
+                frame = self.input_queue.get_nowait()
 
                 t1 = time.time()
                 image = Image.fromarray(frame)
@@ -38,7 +38,7 @@ class MOTWorker(Process):
                 textFPS = 'FPS: {:.2f}'.format(fps)
                 self.fpsQueue.put(textFPS)
 
-                print(f"@@ MOTWorker - BBoxs Ouput: ", len(boxs))
+                # print(f"@@ MOTWorker - BBoxs Ouput: ", len(boxs))
                 if len(boxs) > 0:
                     if isinstance(boxs[0], list):
                         for i in boxs:

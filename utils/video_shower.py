@@ -18,9 +18,9 @@ class VideoShower ():
         # print('@@ showerFrameQueue.qsize: ', showerFrameQueue.qsize())
         # print('@@ showerBBQueue.qsize: ', showerBBQueue.qsize())
         if not showerFrameQueue.empty():
-          print('@@ showerFrameQueue be qsize: ', showerFrameQueue.qsize())
+          # print('@@ showerFrameQueue be qsize: ', showerFrameQueue.qsize())
           frame = showerFrameQueue.get()
-          print('@@ showerFrameQueue af qsize: ', showerFrameQueue.qsize())
+          # print('@@ showerFrameQueue af qsize: ', showerFrameQueue.qsize())
 
           if not showerBBQueue.empty():
             (xmin, ymin, boxw, boxh) = showerBBQueue.get()
@@ -38,10 +38,10 @@ class VideoShower ():
           font = cv2.FONT_HERSHEY_SIMPLEX
           if not fpsQueue.empty():
             fps = fpsQueue.get()
-            cv2.putText(frame, fps, (10, 20), font, 0.5, (255, random.randint(0, 255), 255), 2)
+            cv2.putText(frame, fps, (10, 50), font, 2.0, (255, 0, 255), 2)
             oldFPS = fps
           else:
-            cv2.putText(frame, oldFPS, (10, 20), font, 0.5, (255, random.randint(0, 255), 255), 2)
+            cv2.putText(frame, oldFPS, (10, 50), font, 2.0, (255, 0, 255), 2)
 
           cv2.imshow(win_name, frame)
           cv2.resizeWindow(win_name, 960, 540)
