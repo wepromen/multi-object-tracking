@@ -27,9 +27,9 @@ def bbox_transform(newbboxs):
 
 def main():
     ## get video source
-    video_filename = -1
-    # video_filename = './samples/u_frontcam_cuted_853x480.mp4'
+    video_filename = 1
     video_capture = cv2.VideoCapture(video_filename)
+    # video_filename = './samples/u_frontcam_cuted_853x480.mp4'
 
     #initial shower
     showerVideo = Value('i', 1)
@@ -37,21 +37,19 @@ def main():
     global showerFrameQueue
     global fpsQueue
     global mot_worker_input_queue
-   
-    videoShower = VideoShower()
-    videoShowerProcess = Process(target=videoShower.start, args=(showerVideo, showerFrameQueue, showerBBQueue, fpsQueue))
-    videoShowerProcess.start()
 
-    # NOTE: MOT Workers
+    # Start MOT Process
     number_of_mot_workers = 1
-
     for i in range(number_of_mot_workers):
         mot_worker = MOTWorker(input_queue=mot_worker_input_queue,
                                 output_queue=showerBBQueue, name= '@@ MOTWorker ' + str(i), fpsQueue = fpsQueue)
         mot_worker.daemon = True
         print(mot_worker)
         mot_worker.start()
-
+    # Start playback Process
+    videoShower = VideoShower()
+    videoShowerProcess = Process(target=videoShower.start, args=(showerVideo, showerFrameQueue, showerBBQueue, fpsQueue))
+    videoShowerProcess.start()
 
     while True:
         ok, frame = video_capture.read()  # frame shape 640*480*3
@@ -66,25 +64,6 @@ def main():
             mot_worker_input_queue.put_nowait(frame)
             # print('@@ === Put frame qsize: ', mot_worker_input_queue.qsize())
         
-        
-    # frame_rate = 10000
-    # prev = 0
-
-    # while True:
-    #     time_elapsed = time.time() - prev
-    #     ok, frame = video_capture.read()  # frame shape 640*480*3
-    #     if ok != True:
-    #         break;
-
-    #     if time_elapsed > 1./frame_rate:
-    #         prev = time.time()
-
-    #         if videoShowerProcess is not None:
-    #             showerFrameQueue.put(frame)
-    #             # print('@@ === Put frame to shower Proc')
-
-    #         mot_worker_input_queue.put(frame)
-
     video_capture.release()
 
     if videoShowerProcess is not None:

@@ -1,47 +1,45 @@
+from multiprocessing import Queue
 import random
 import cv2
 import numpy as np 
 
+bkBBoxQ = Queue()
 class VideoShower ():
-  # def __init__ (self, path, fps):
-  #   self.fps = fps
-  #   self.path = path
   def start (self, showerVideo, showerFrameQueue, showerBBQueue, fpsQueue):
-    print('===== \nStarting showerVideo: {0} \n showerFrameQueue: {1} \n showerBBQueue: {2}\n'.format(showerVideo.value, showerFrameQueue.qsize(), showerBBQueue.qsize()))
-    oldBBox = None
+    global bkBBoxQ
+    bkBBoxQ = Queue()
     oldFPS = None
     win_name = "output"
     cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)    # Create window with freedom of dimensions
     try:
       while showerVideo.value or not showerFrameQueue.empty():
         #if bbox queue is not empty then get bbox and write it. Otherwise do not nothing.
-        # print('@@ showerFrameQueue.qsize: ', showerFrameQueue.qsize())
-        # print('@@ showerBBQueue.qsize: ', showerBBQueue.qsize())
         if not showerFrameQueue.empty():
-          # print('@@ showerFrameQueue be qsize: ', showerFrameQueue.qsize())
           frame = showerFrameQueue.get()
-          # print('@@ showerFrameQueue af qsize: ', showerFrameQueue.qsize())
-
+          
+          # draw Bounding box
           if not showerBBQueue.empty():
-            (xmin, ymin, boxw, boxh) = showerBBQueue.get()
-            # print('@@ shower Prc bbox: ', xmin, ymin, boxw, boxh)
-            cv2.rectangle(frame, (xmin,ymin), (xmin+boxw,ymin+boxh), (255,0,255), 2) # BGR color
-            # cv2.putText(frame, str(j),(xmin,ymin),0, 5e-3 * 200, (0,255,0),2)
-            oldBBox = (xmin, ymin, boxw, boxh)
-            
+            # print('@@ bkBBoxQ bf size: ', bkBBoxQ.qsize())
+            for i in range(showerBBQueue.qsize()):
+              (xmin, ymin, boxw, boxh) = showerBBQueue.get()
+              cv2.rectangle(frame, (xmin,ymin), (xmin+boxw,ymin+boxh), (50,255,255), 2) # BGR color
+              bkBBoxQ.put_nowait((xmin, ymin, boxw, boxh)) # put new BBox to Backup queue
           else:
-            if (oldBBox is not None):
-              (xmin, ymin, boxw, boxh) = oldBBox
-              # print('@@ shower Prc bbox: ', xmin, ymin, boxw, boxh)
-              cv2.rectangle(frame, (xmin,ymin), (xmin+boxw,ymin+boxh), (255,0,255), 2) # BGR color
-
+            if (bkBBoxQ.qsize() > 0 ): # and no_bb_count <= 200
+              # print('@@ 1 bkBBoxQ size: ', bkBBoxQ.qsize())
+              for i in range(bkBBoxQ.qsize()):
+                (xmin, ymin, boxw, boxh) = bkBBoxQ.get_nowait()
+                cv2.rectangle(frame, (xmin,ymin), (xmin+boxw,ymin+boxh), (50,255,255), 2) # BGR color
+                # print('@@ 3 draw old BBoxs ', xmin, ymin, boxw, boxh)
+          
+          # draw FPS
           font = cv2.FONT_HERSHEY_SIMPLEX
           if not fpsQueue.empty():
             fps = fpsQueue.get()
-            cv2.putText(frame, fps, (10, 50), font, 2.0, (255, 0, 255), 2)
+            cv2.putText(frame, fps, (10, 50), font, 1, (50,255,255), 2)
             oldFPS = fps
           else:
-            cv2.putText(frame, oldFPS, (10, 50), font, 2.0, (255, 0, 255), 2)
+            cv2.putText(frame, oldFPS, (10, 50), font, 1, (50,255,255), 2)
 
           cv2.imshow(win_name, frame)
           cv2.resizeWindow(win_name, 960, 540)

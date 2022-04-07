@@ -27,7 +27,7 @@ oldBBox = None
 oldFPS = None
 
 def frameGetter():
-    video_filename = -1
+    video_filename = 1
     video_capture = cv2.VideoCapture(video_filename)
     global input_playback_f_q
     global input_mot_f_q
