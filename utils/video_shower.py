@@ -21,16 +21,21 @@ class VideoShower ():
           if not showerBBQueue.empty():
             # print('@@ bkBBoxQ bf size: ', bkBBoxQ.qsize())
             for i in range(showerBBQueue.qsize()):
-              (xmin, ymin, boxw, boxh) = showerBBQueue.get()
-              cv2.rectangle(frame, (xmin,ymin), (xmin+boxw,ymin+boxh), (50,255,255), 2) # BGR color
-              bkBBoxQ.put_nowait((xmin, ymin, boxw, boxh)) # put new BBox to Backup queue
+                bboxsInF = showerBBQueue.get()
+                bkBBoxQ.put(bboxsInF)
+                for j in bboxsInF:
+                  (xmin, ymin, boxw, boxh) = j
+                  cv2.rectangle(frame, (xmin,ymin), (xmin+boxw,ymin+boxh), (50,255,255), 2) # BGR color
+                  # bkBBoxQ.put_nowait((xmin, ymin, boxw, boxh)) # put new BBox to Backup queue
           else:
-            if (bkBBoxQ.qsize() > 0 ): # and no_bb_count <= 200
+            if (bkBBoxQ.qsize() > 0 ): 
               # print('@@ 1 bkBBoxQ size: ', bkBBoxQ.qsize())
-              for i in range(bkBBoxQ.qsize()):
-                (xmin, ymin, boxw, boxh) = bkBBoxQ.get_nowait()
-                cv2.rectangle(frame, (xmin,ymin), (xmin+boxw,ymin+boxh), (50,255,255), 2) # BGR color
-                # print('@@ 3 draw old BBoxs ', xmin, ymin, boxw, boxh)
+              for ii in range(bkBBoxQ.qsize()):
+                bboxsInF = bkBBoxQ.get()
+                for jj in bboxsInF:
+                  (xmin, ymin, boxw, boxh) = jj
+                  cv2.rectangle(frame, (xmin,ymin), (xmin+boxw,ymin+boxh), (50,255,255), 2) # BGR color
+                  # print('@@ 3 draw old BBoxs ', xmin, ymin, boxw, boxh)
           
           # draw FPS
           font = cv2.FONT_HERSHEY_SIMPLEX

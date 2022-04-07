@@ -40,9 +40,9 @@ class MOTWorker(Process):
 
                 # print(f"@@ MOTWorker - BBoxs Ouput: ", len(boxs))
                 if len(boxs) > 0:
-                    if isinstance(boxs[0], list):
-                        for i in boxs:
-                            self.output_queue.put(i)
-                    else:
+                    # if isinstance(boxs[0], list):
+                    #     for i in boxs:
+                    #         self.output_queue.put(i)
+                    # else:
                         self.output_queue.put(boxs)
 
