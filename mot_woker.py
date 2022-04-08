@@ -35,7 +35,7 @@ class MOTWorker(Process):
                 print('@@ Yolo det-time: ', t_detec_end - t2)
                 fps  = ( fps + (1./(t_detec_end-t1)) ) / 2
                 print("fps= %f"%(fps))
-                textFPS = 'FPS: {:.2f}'.format(fps)
+                textFPS = 'MOT FPS: {:.2f}'.format(fps)
                 self.fpsQueue.put(textFPS)
 
                 # print(f"@@ MOTWorker - BBoxs Ouput: ", len(boxs))

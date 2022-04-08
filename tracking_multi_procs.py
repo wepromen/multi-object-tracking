@@ -28,8 +28,19 @@ def bbox_transform(newbboxs):
 def main():
     ## get video source
     video_filename = 1
-    video_capture = cv2.VideoCapture(video_filename)
     # video_filename = './samples/u_frontcam_cuted_853x480.mp4'
+    video_capture = cv2.VideoCapture(video_filename)
+    # resize frame resolution
+    # width, height = 960, 540
+
+    # video_capture.set(cv2.CAP_PROP_FPS, 30)
+    # v4l2-ctl -d /dev/video1 --list-formats-ext to see support resolutions
+    # ret = video_capture.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+    # ret1 = video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
+    # print('@@ set resolution: ', ret, ret1)
+    video_fps = video_capture.get(cv2.CAP_PROP_FPS)
+    print('@@ cap fps: ', video_fps)
+    print('@@ frame resolution: ', video_capture.get(cv2.CAP_PROP_FRAME_WIDTH), video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     #initial shower
     showerVideo = Value('i', 1)
@@ -48,13 +59,16 @@ def main():
         mot_worker.start()
     # Start playback Process
     videoShower = VideoShower()
-    videoShowerProcess = Process(target=videoShower.start, args=(showerVideo, showerFrameQueue, showerBBQueue, fpsQueue))
+    videoShowerProcess = Process(target=videoShower.start, args=(showerVideo, showerFrameQueue, showerBBQueue, fpsQueue, video_fps ))
     videoShowerProcess.start()
 
     while True:
         ok, frame = video_capture.read()  # frame shape 640*480*3
         if ok != True:
             break;
+
+        # frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_NEAREST)
+        # print('@@ cv2.resize: ', width, height)
 
         if showerFrameQueue.qsize() <= 1:
             showerFrameQueue.put(frame)
